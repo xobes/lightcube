@@ -2,3 +2,8 @@
 .workshop.lock
 
 *.swp
+
+# until things work, and unless the workshop isn't handling them, i think it makes
+# sense to keep ignoring these things
+.west
+zephyr
