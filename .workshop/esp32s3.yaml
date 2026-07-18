@@ -1,0 +1,50 @@
+# workshop.yaml
+name: esp32s3
+base: ubuntu@24.04
+
+sdks:
+  - name: uv
+  - name: opencode
+  - name: zephyr
+    # channel: 4.2/stable
+    channel: 4.4/stable
+  - name: zephyr-sdk-ng
+    # channel: 0.17.4/stable
+    channel: 1.0.1/stable
+  - name: zephyr-xtensa-espressif-esp32s3
+    # channel: 0.17.4/stable
+    channel: 1.0.1/stable
+
+connections:
+  - plug: zephyr:sdk-ng
+    slot: zephyr-sdk-ng:sdk-ng
+  - plug: zephyr-sdk-ng:xtensa-espressif-esp32s3
+    slot: zephyr-xtensa-espressif-esp32s3:toolchain
+  - plug: zephyr:venv
+    slot: uv:venv
+
+actions:
+  init: source ~/uv-venv/bin/activate && west init
+  west: source ~/uv-venv/bin/activate && west "$@"
+  hello-world: |
+    #!/usr/bin/env bash
+    source ~/uv-venv/bin/activate
+    export ZEPHYR_SDK_INSTALL_DIR=/var/lib/workshop/sdk/zephyr-sdk-ng/zephyr-sdk/
+    ls $ZEPHYR_SDK_INSTALL_DIR/ -al
+    cd zephyr
+    west build -p always -b weact_esp32s3_mini/esp32s3/procpu samples/hello_world 2>&1 | tee > debug_hello.txt
+
+# Problem was: 
+#  Unable to find 'x86_64-zephyr-elf' or any other architecture in
+#  /var/lib/workshop/sdk/zephyr/zephyr-sdk/zephyr-sdk/gnu
+# With this variable set, no change:
+#  export ZEPHYR_SDK_INSTALL_DIR=/var/lib/workshop/sdk/zephyr-sdk-ng/zephyr-sdk/
+#  Unable to find 'x86_64-zephyr-elf' or any other architecture in
+#  /var/lib/workshop/sdk/zephyr-sdk-ng/zephyr-sdk/gnu
+
+  blinky: |
+    #!/usr/bin/env bash
+    source ~/uv-venv/bin/activate
+    cd zephyr
+    west build -p always -b weact_esp32s3_mini/esp32s3/procpu samples/basic/blinky 2>&1 | tee > debug_blinky.txt
+
